@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const client = require('./whatsappClient');
+const { client, isReady } = require('./whatsappClient');
+const path = require('path');
 
 const app = express();
 
@@ -37,5 +38,31 @@ app.post('/send', async (req, res) => {
         res.status(500).json({ error: "Failed to send messages" });
     }
 });
+
+// Add status endpoint
+app.get('/status', (req, res) => {
+    try {
+        const connected = isReady();
+        console.log('WhatsApp connection status:', connected);
+        res.json({ 
+            connected: connected,
+            serverStatus: 'running'
+        });
+    } catch (error) {
+        console.error('Status check error:', error);
+        res.status(500).json({ 
+            connected: false,
+            error: error.message,
+            serverStatus: 'error'
+        });
+    }
+});
+
+app.use(express.static(path.join(__dirname, 'dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 
 app.listen(3001, () => console.log("Server running on port 3001"));

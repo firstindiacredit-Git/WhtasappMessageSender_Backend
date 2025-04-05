@@ -16,12 +16,24 @@ client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
 });
 
+let isReady = false;
+
 // Confirm when logged in
 client.on('ready', () => {
+    isReady = true;
     console.log("WhatsApp Client is ready!");
+});
+
+client.on('disconnected', () => {
+    isReady = false;
+    console.log("WhatsApp Client is disconnected!");
 });
 
 // Start client
 client.initialize();
 
-module.exports = client;
+// Update the exports
+module.exports = {
+    client,
+    isReady: () => isReady
+};
