@@ -24,15 +24,23 @@ app.post('/send', async (req, res) => {
         return res.status(400).json({ error: "Numbers and message are required" });
     }
 
+    // Limit to 100 numbers
+    const limitedNumbers = numbers.slice(0, 100);
+
     try {
-        for (const number of numbers) {
+        for (const number of limitedNumbers) {
             // नंबर को फॉर्मैट करें
             const formattedNumber = number.startsWith('91') ? number : `91${number}`;
             let chatId = `${formattedNumber}@c.us`;
             await client.sendMessage(chatId, message);
         }
 
-        res.json({ success: true, message: "Messages sent successfully!" });
+        res.json({ 
+            success: true, 
+            message: "Messages sent successfully!", 
+            numbersSent: limitedNumbers.length,
+            numbersLimited: numbers.length > 100 ? numbers.length - 100 : 0
+        });
     } catch (error) {
         console.error("Error sending messages:", error);
         res.status(500).json({ error: "Failed to send messages" });
